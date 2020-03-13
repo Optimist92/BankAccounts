@@ -2,13 +2,13 @@ package account.ui;
 
 import accounts.Factory;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 
 public class CommandManager implements Command {
 	private Factory factory = new Factory();
-	private Map <String, Command> commands = new HashMap<String, Command>();
+	private Map <String, Command> commands = new LinkedHashMap<String, Command>();
 
 	public CommandManager() {
 		commands.put("help", this);
