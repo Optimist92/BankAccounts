@@ -7,17 +7,18 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 import account.domain.Account;
-import account.storage.AccountStorage;
-import account.storage.memory.AccountMemoryStorageImpl;
+import account.storage.AccountDao;
+import account.storage.DaoException;
+import account.storage.memory.AccountMemoryDaoImpl;
 
 public class CheckBalance {
 	final private static String fileName = "operations.csv";
 	final private static String encoding = "UTF-8";
-	private static AccountStorage accountStorage = new AccountMemoryStorageImpl();;
+	private static AccountDao accountDao = new AccountMemoryDaoImpl();;
 	private static List<Account> accounts;
 	
-	public static void main(String[] args) {
-		accounts = accountStorage.read();
+	public static void main(String[] args) throws DaoException {
+		accounts = accountDao.read();
 		FileInputStream fis = null;
 		InputStreamReader isr = null;
 		BufferedReader br = null;

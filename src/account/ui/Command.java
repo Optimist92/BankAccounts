@@ -1,6 +1,7 @@
 package account.ui;
 
+import account.logic.LogicException;
 
 public interface Command {
-	void exec(String[] args);
+	boolean exec(String[] args) throws LogicException;
 }

@@ -3,12 +3,13 @@ package account.ui;
 import java.util.List;
 
 import account.domain.Account;
+import account.logic.LogicException;
 
 
 public class AccountBalanceCommand extends AccountCommand{
 
 	@Override
-	public void exec(String[] args) {
+	public boolean exec(String[] args) throws LogicException{
 		if(args.length == 1) {
 			List<Account> accounts = getAccountService().findAll();
 			int count = 0;
@@ -26,6 +27,7 @@ public class AccountBalanceCommand extends AccountCommand{
 		} else {
 			System.out.println("Неверное количество аргументов");
 		}
+		return true;
 	}
 
 }

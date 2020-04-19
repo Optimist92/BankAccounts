@@ -1,10 +1,13 @@
 package account.domain;
 
-import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-public class Account implements Serializable{
+public class Account extends Entity{
+	public static final SimpleDateFormat FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 	private Long numberAccount;
 	private Long balanceAccount;
+	private Date date;
 	
 	public Long getNumberAccount() {
 		return numberAccount;
@@ -20,6 +23,15 @@ public class Account implements Serializable{
 
 	public void setBalanceAccount(Long balanceAccount) {
 		this.balanceAccount = balanceAccount;
+	}
+
+	
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	@Override

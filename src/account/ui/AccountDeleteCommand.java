@@ -1,10 +1,11 @@
 package account.ui;
 
+import account.logic.LogicException;
 
 public class AccountDeleteCommand extends AccountCommand{
 
 	@Override
-	public void exec(String[] args) {
+	public boolean exec(String[] args) throws LogicException{
 		if(args.length == 1) {
 			if (getAccountService().read(Long.valueOf(args[0])).getBalanceAccount()==0) {
 				if (getAccountService().delete(Long.valueOf(args[0]))) {
@@ -18,6 +19,7 @@ public class AccountDeleteCommand extends AccountCommand{
 		} else {
 			System.out.println("Неверное количество аргументов");
 		}
+		return true;
 	}
 
 }

@@ -9,12 +9,13 @@ import java.util.Date;
 import java.util.List;
 
 import account.domain.Account;
+import account.logic.LogicException;
 public class AccountRefillCommand extends AccountCommand{
 	final private static String fileName = "operations.csv";
 	final private static String encoding = "cp1251";
 	
 	@Override
-	public void exec(String[] args) {
+	public boolean exec(String[] args) throws LogicException{
 		List<Account> accounts = getAccountService().findAll();
 		String s;
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss");
@@ -45,6 +46,7 @@ public class AccountRefillCommand extends AccountCommand{
 		} else {
 			System.out.println("Неверное количество аргументов");
 		}
+		return true;
 	}
 
 }

@@ -1,9 +1,15 @@
 package accounts;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import account.logic.AccountService;
 import account.logic.AccountServiceImpl;
-import account.storage.AccountStorage;
-import account.storage.memory.AccountMemoryStorageImpl;
+import account.logic.LogicException;
+import account.storage.AccountDao;
+import account.storage.memory.AccountMemoryDaoImpl;
+import account.storage.postgres.AccountDbDaoImpl;
 import account.ui.AccountBalanceCommand;
 import account.ui.AccountDeleteCommand;
 import account.ui.AccountListCommand;
@@ -14,29 +20,31 @@ import account.ui.AccountWithdrawalCommand;
 import account.ui.Command;
 import account.ui.ExitCommand;
 
-public class Factory {
+public class Factory implements AutoCloseable{
 	
-	private AccountStorage accountStorage = null;
+	private AccountDao accountDao = null;
 	
-	public AccountStorage getAccountStorage () {
-		if (accountStorage==null) {
-			accountStorage = new AccountMemoryStorageImpl();
+	public AccountDao getAccountDao () throws LogicException{
+		if(accountDao == null) {
+			AccountDbDaoImpl accountDaoImpl = new AccountDbDaoImpl();
+			accountDao = accountDaoImpl;
+			accountDaoImpl.setConnection(getConnection());
 		}
-		return accountStorage;
+		return accountDao;
 	}
 	
 	private AccountService accountService = null;
-	public AccountService getAccountService () {
+	public AccountService getAccountService () throws LogicException {
 		if (accountService==null) {
 			AccountServiceImpl service = new AccountServiceImpl();
 			accountService = service;
-			service.setAccountStorage(getAccountStorage());
+			service.setAccountDao(getAccountDao());
 		}
 		return accountService;
 	}
 	
 	private Command accountOpenCommand = null;
-	public Command getAccountOpenCommand () {
+	public Command getAccountOpenCommand () throws LogicException {
 		if (accountOpenCommand == null) {
 			AccountOpenCommand command = new AccountOpenCommand();
 			accountOpenCommand=command;
@@ -46,7 +54,7 @@ public class Factory {
 	}
 	
 	private Command accountDeleteCommand = null;
-	public Command getAccountDeleteCommand () {
+	public Command getAccountDeleteCommand () throws LogicException {
 		if (accountDeleteCommand == null) {
 			AccountDeleteCommand command = new AccountDeleteCommand();
 			accountDeleteCommand=command;
@@ -56,7 +64,7 @@ public class Factory {
 	}
 	
 	private Command accountBalanceCommand = null;
-	public Command getAccountBalanceCommand () {
+	public Command getAccountBalanceCommand () throws LogicException {
 		if (accountBalanceCommand == null) {
 			AccountBalanceCommand command = new AccountBalanceCommand();
 			accountBalanceCommand=command;
@@ -66,7 +74,7 @@ public class Factory {
 	}
 	
 	private Command accountTransferCommand = null;
-	public Command getAccountTransferCommand () {
+	public Command getAccountTransferCommand () throws LogicException {
 		if (accountTransferCommand == null) {
 			AccountTransferCommand command = new AccountTransferCommand();
 			accountTransferCommand=command;
@@ -76,7 +84,7 @@ public class Factory {
 	}
 	
 	private Command accountRefillCommand = null;
-	public Command getAccountRefillCommand () {
+	public Command getAccountRefillCommand () throws LogicException {
 		if (accountRefillCommand == null) {
 			AccountRefillCommand command = new AccountRefillCommand();
 			accountRefillCommand=command;
@@ -86,7 +94,7 @@ public class Factory {
 	}
 	
 	private Command accountWithdrawalCommand = null;
-	public Command getAccountWithdrawalCommand () {
+	public Command getAccountWithdrawalCommand () throws LogicException {
 		if (accountWithdrawalCommand == null) {
 			AccountWithdrawalCommand command = new AccountWithdrawalCommand();
 			accountWithdrawalCommand=command;
@@ -95,7 +103,7 @@ public class Factory {
 		return accountWithdrawalCommand;
 	}
 	private Command accountListCommand = null;
-	public Command getAccountListCommand () {
+	public Command getAccountListCommand () throws LogicException {
 		if (accountListCommand == null) {
 			AccountListCommand command = new AccountListCommand();
 			accountListCommand=command;
@@ -103,13 +111,21 @@ public class Factory {
 		}
 		return accountListCommand;
 	}
-	private Command exitCommand = null;
-	public Command getExitCommand () {
-		if (exitCommand == null) {
-			ExitCommand command = new ExitCommand();
-			exitCommand=command;
-			command.setAccountService(getAccountService());
+	
+	private Connection connection = null;
+	public Connection getConnection() throws LogicException {
+		if(connection == null) {
+			try {
+				connection = DriverManager.getConnection("jdbc:postgresql://localhost/store_db", "root", "root");
+			} catch(SQLException e) {
+				throw new LogicException(e);
+			}
 		}
-		return exitCommand;
+		return connection;
+	}
+	
+	@Override
+	public void close() {
+		try { connection.close(); } catch(Exception e) {}
 	}
 }

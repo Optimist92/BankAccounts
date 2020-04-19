@@ -2,65 +2,87 @@ package account.logic;
 
 import java.util.List;
 
+
 import account.domain.Account;
-import account.storage.AccountStorage;
+import account.storage.AccountDao;
+import account.storage.DaoException;
 
 public class AccountServiceImpl implements AccountService {
-	private AccountStorage accountStorage;
+	private AccountDao accountDao;
 
-	public void setAccountStorage(AccountStorage accountStorage) {
-		this.accountStorage = accountStorage;
+	public void setAccountDao(AccountDao accountDao) {
+		this.accountDao = accountDao;
 	}
 	
 	@Override
-	public Account read (Long numberAccount) {
-		return accountStorage.read(numberAccount);
+	public Account read (Long numberAccount) throws LogicException{
+		try {
+			return accountDao.read(numberAccount);
+		} catch(DaoException e) {
+			throw new LogicException(e);
+		}
+	}
+
+	@Override
+	public List <Account> findAll() throws LogicException {
+		try {
+			return accountDao.read();
+		} catch(DaoException e) {
+			throw new LogicException(e);
+		}
+	}
+
+	@Override
+	public void create(Account account) throws LogicException {
+		try {
+			accountDao.create(account);
+		} catch(DaoException e) {
+			throw new LogicException(e);
+		}
 		
 	}
 
 	@Override
-	public List <Account> findAll() {
-		return accountStorage.read();
-	}
-
-	@Override
-	public void create(Account account) {
-		accountStorage.create(account);
+	public boolean delete(Long numberAccount) throws LogicException {
+		try {
+			return accountDao.delete(numberAccount);
+		} catch(DaoException e) {
+			throw new LogicException(e);
+		}
+		
 		
 	}
 
 	@Override
-	public boolean delete(Long numberAccount) {
-		return accountStorage.delete(numberAccount);
-		
-	}
-
-	@Override
-	public boolean transfer(Long accountFromNumber, Long accountOnNumber, Long balance) {
-		if (balance<0) {
-			System.out.println("Не верный баланс.");
-			return false;
-		} else {
-			if (accountStorage.read(accountFromNumber)==null && accountStorage.read(accountOnNumber)==null) {
-				System.out.println("Счетов не найдено. Перевод средств невозможен.");
+	public boolean transfer(Long accountFromNumber, Long accountOnNumber, Long balance) throws LogicException {
+		try {
+			if (balance<0) {
+				System.out.println("Не верный баланс.");
 				return false;
-			} else if (accountStorage.read(accountFromNumber)==null) {
-				accountStorage.read(accountOnNumber).setBalanceAccount(balance + accountStorage.read(accountOnNumber).getBalanceAccount());
-				System.out.println("На счёт № " + accountStorage.read(accountOnNumber).getNumberAccount() + " наличными зачислено $" + balance/100.0);
-				return true;
-			} else if (accountStorage.read(accountOnNumber)==null && accountStorage.read(accountFromNumber).getBalanceAccount()>= balance) {
-				accountStorage.read(accountFromNumber).setBalanceAccount(accountStorage.read(accountFromNumber).getBalanceAccount() - balance);
-				System.out.println("Со счёта № " + accountStorage.read(accountFromNumber).getNumberAccount() + " снято наличными $" + balance/100.0);
-				return true;
-			} else if (accountStorage.read(accountFromNumber).getBalanceAccount()>= balance){
-				accountStorage.read(accountFromNumber).setBalanceAccount(accountStorage.read(accountFromNumber).getBalanceAccount() - balance);
-				accountStorage.read(accountOnNumber).setBalanceAccount(accountStorage.read(accountOnNumber).getBalanceAccount() + balance);
-				System.out.println("Осуществлён перевод со счёта № " + accountStorage.read(accountFromNumber).getNumberAccount() + " на счёт № " + accountStorage.read(accountOnNumber).getNumberAccount() + " в размере $" + balance/100.0);
-				return true;
 			} else {
-				System.out.println("На счёте № " + accountStorage.read(accountFromNumber).getNumberAccount() + " недостаточно средств для перевода(снятия).");
-				return false;
+				if (accountDao.read(accountFromNumber)==null && accountDao.read(accountOnNumber)==null) {
+					System.out.println("Счетов не найдено. Перевод средств невозможен.");
+					return false;
+				} else if (accountDao.read(accountFromNumber)==null) {
+					accountDao.read(accountOnNumber).setBalanceAccount(balance + accountDao.read(accountOnNumber).getBalanceAccount());
+					System.out.println("На счёт № " + accountDao.read(accountOnNumber).getNumberAccount() + " наличными зачислено $" + balance/100.0);
+					return true;
+				} else if (accountDao.read(accountOnNumber)==null && accountDao.read(accountFromNumber).getBalanceAccount()>= balance) {
+					accountDao.read(accountFromNumber).setBalanceAccount(accountDao.read(accountFromNumber).getBalanceAccount() - balance);
+					System.out.println("Со счёта № " + accountDao.read(accountFromNumber).getNumberAccount() + " снято наличными $" + balance/100.0);
+					return true;
+				} else if (accountDao.read(accountFromNumber).getBalanceAccount()>= balance){
+					accountDao.read(accountFromNumber).setBalanceAccount(accountDao.read(accountFromNumber).getBalanceAccount() - balance);
+					accountDao.read(accountOnNumber).setBalanceAccount(accountDao.read(accountOnNumber).getBalanceAccount() + balance);
+					System.out.println("Осуществлён перевод со счёта № " + accountDao.read(accountFromNumber).getNumberAccount() + " на счёт № " + accountDao.read(accountOnNumber).getNumberAccount() + " в размере $" + balance/100.0);
+					return true;
+				} else {
+					System.out.println("На счёте № " + accountDao.read(accountFromNumber).getNumberAccount() + " недостаточно средств для перевода(снятия).");
+					return false;
+				}
 			}
+		} catch(DaoException e) {
+			throw new LogicException(e);
 		}
 	}
 
